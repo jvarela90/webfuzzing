@@ -1,6 +1,6 @@
 # test_system.ps1 - Prueba completa del sistema
 Write-Host "Testing Security Fuzzing System" -ForegroundColor Cyan
-Write-Host "=" * 60
+Write-Host ("=" * 60)
 
 $errors = @()
 $tests_passed = 0
@@ -75,19 +75,19 @@ try {
 }
 
 # Test 5: Verificar módulo config
-Write-Host "Test 5: Verificando módulo config..." -ForegroundColor Yellow
+Write-Host "Test 5: Verificando modulo config..." -ForegroundColor Yellow
 try {
     $output = & .\venv\Scripts\python.exe -c "from config.settings import config; print('Config module OK')" 2>&1
     if ($output -like "*Config module OK*") {
-        Write-Host "Módulo config OK" -ForegroundColor Green
+        Write-Host "Modulo config OK" -ForegroundColor Green
         $tests_passed++
     } else {
-        Write-Host "Error en módulo config" -ForegroundColor Red
-        $errors += "Módulo config con errores"
+        Write-Host "Error en modulo config" -ForegroundColor Red
+        $errors += "Modulo config con errores"
     }
 } catch {
-    Write-Host "Error verificando módulo config" -ForegroundColor Red
-    $errors += "Error en módulo config"
+    Write-Host "Error verificando modulo config" -ForegroundColor Red
+    $errors += "Error en modulo config"
 }
 
 # Test 6: Verificar fuzzing engine
@@ -122,20 +122,31 @@ try {
     $errors += "Error en config.yaml"
 }
 
-# Test 8: Test de importación completa
+# Test 8: Test de importación completa (corregido)
 Write-Host "Test 8: Test de importacion completa..." -ForegroundColor Yellow
 try {
-    $test_script = 'try:
-    import sys, os
-    sys.path.append(".")
+    # Crear archivo temporal para el test
+    $test_code = @"
+import sys
+import os
+sys.path.append('.')
+try:
     from config.settings import config
     from core.fuzzing_engine import *
     import flask, requests, aiohttp, loguru
-    print("Complete import test OK")
+    print('Complete import test OK')
 except Exception as e:
-    print(f"Import error: {e}")'
+    print(f'Import error: {e}')
+"@
     
-    $output = & .\venv\Scripts\python.exe -c $test_script 2>&1
+    $temp_file = "temp_test.py"
+    $test_code | Out-File -FilePath $temp_file -Encoding UTF8
+    
+    $output = & .\venv\Scripts\python.exe $temp_file 2>&1
+    
+    # Limpiar archivo temporal
+    Remove-Item $temp_file -ErrorAction SilentlyContinue
+    
     if ($output -like "*Complete import test OK*") {
         Write-Host "Importacion completa OK" -ForegroundColor Green
         $tests_passed++
@@ -146,23 +157,32 @@ except Exception as e:
 } catch {
     Write-Host "Error en test de importacion" -ForegroundColor Red
     $errors += "Error en test de importacion"
+    # Limpiar archivo temporal en caso de error
+    Remove-Item "temp_test.py" -ErrorAction SilentlyContinue
 }
 
 # Resumen final
 Write-Host ""
-Write-Host "=" * 60
+Write-Host ("=" * 60)
 Write-Host "Resumen de Pruebas" -ForegroundColor Cyan
-Write-Host "=" * 60
+Write-Host ("=" * 60)
 Write-Host "Pruebas exitosas: $tests_passed/$total_tests" -ForegroundColor Green
 
 if ($errors.Count -eq 0) {
-    Write-Host "Sistema Completamente Funcional!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Comandos para usar:" -ForegroundColor Yellow
-    Write-Host "  Dashboard: python web\app.py" -ForegroundColor Gray
-    Write-Host "  API: python api\app.py" -ForegroundColor Gray
-    Write-Host "  Fuzzer: python -m core.fuzzing_engine --help" -ForegroundColor Gray
-    Write-Host "  Scripts: start_dashboard.bat, start_api.bat" -ForegroundColor Gray
+    Write-Host "SISTEMA 100% FUNCIONAL!" -ForegroundColor Green -BackgroundColor DarkGreen
+    Write-Host ""
+    Write-Host "Comandos listos para usar:" -ForegroundColor Yellow
+    Write-Host "  Dashboard:     python web\app.py" -ForegroundColor Gray
+    Write-Host "  API REST:      python api\app.py" -ForegroundColor Gray
+    Write-Host "  Fuzzer:        python -m core.fuzzing_engine --help" -ForegroundColor Gray
+    Write-Host "  Scripts BAT:   start_dashboard.bat" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "URLs del sistema:" -ForegroundColor Yellow
+    Write-Host "  Dashboard:     http://localhost:5000" -ForegroundColor Cyan
+    Write-Host "  API REST:      http://localhost:8000" -ForegroundColor Cyan
+    Write-Host "  Health Check:  http://localhost:8000/health" -ForegroundColor Cyan
+    
 } else {
     Write-Host "Errores encontrados ($($errors.Count)):" -ForegroundColor Red
     for ($i = 0; $i -lt $errors.Count; $i++) {
@@ -170,25 +190,24 @@ if ($errors.Count -eq 0) {
     }
     Write-Host ""
     Write-Host "Soluciones recomendadas:" -ForegroundColor Yellow
-    Write-Host "   1. Ejecutar: install_dependencies.bat" -ForegroundColor Gray
-    Write-Host "   2. Instalar loguru: pip install loguru" -ForegroundColor Gray
-    Write-Host "   3. Crear archivos faltantes segun errores" -ForegroundColor Gray
-    Write-Host "   4. Verificar sintaxis de config.yaml" -ForegroundColor Gray
+    Write-Host "   1. Crear archivo api\app.py" -ForegroundColor Gray
+    Write-Host "   2. Verificar imports en core\fuzzing_engine.py" -ForegroundColor Gray
+    Write-Host "   3. Ejecutar: pip install -r requirements.txt" -ForegroundColor Gray
 }
 
-Write-Host "=" * 60
+Write-Host ("=" * 60)
 
 # Mostrar siguiente paso recomendado
 if ($tests_passed -lt $total_tests) {
     Write-Host ""
-    Write-Host "Proximo Paso Recomendado:" -ForegroundColor Cyan
-    if ($errors -contains "Loguru faltante") {
-        Write-Host "pip install loguru colorama tqdm" -ForegroundColor Yellow
-    } elseif ($errors -contains "Archivos faltantes") {
-        Write-Host "Crear archivos faltantes mostrados arriba" -ForegroundColor Yellow
-    } elseif ($errors -contains "Dependencias Python faltantes") {
-        Write-Host ".\install_dependencies.bat" -ForegroundColor Yellow
+    Write-Host "Proximo Paso:" -ForegroundColor Cyan
+    if ($errors -contains "Archivos faltantes") {
+        Write-Host "Crear archivo: api\app.py" -ForegroundColor Yellow
     } else {
         Write-Host "Revisar errores especificos mostrados arriba" -ForegroundColor Yellow
     }
+} else {
+    Write-Host ""
+    Write-Host "SISTEMA LISTO!" -ForegroundColor Green
+    Write-Host "Ejecuta: start_dashboard.bat" -ForegroundColor Yellow
 }
