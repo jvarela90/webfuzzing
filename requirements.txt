@@ -1,0 +1,44 @@
+# Core dependencies
+flask>=2.3.0
+requests>=2.31.0
+sqlite3
+pyyaml>=6.0
+click>=8.0.0
+
+# Web interface
+jinja2>=3.1.0
+werkzeug>=2.3.0
+
+# API
+flask-restful>=0.3.10
+flask-jwt-extended>=4.5.0
+flask-cors>=4.0.0
+flask-limiter>=3.0.0
+marshmallow>=3.19.0
+
+# ML and analytics
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+plotly>=5.15.0
+
+# Security and crypto
+cryptography>=41.0.0
+bcrypt>=4.0.0
+
+# Automation and scheduling
+schedule>=1.2.0
+asyncio
+
+# Notifications
+python-telegram-bot>=20.0.0
+
+# Development and testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Optional ML dependencies
+joblib>=1.3.0
+nltk>=3.8.0
