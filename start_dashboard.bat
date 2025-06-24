@@ -7,6 +7,6 @@ if exist venv\Scripts\activate.bat (
     call venv\Scripts\activate.bat
 )
 
-C:\Users\jvarela\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe -m web.app
+D:\security_fuzzing_system\venv\Scripts\python.exe -m web.app
 
 pause

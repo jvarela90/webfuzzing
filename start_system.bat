@@ -8,6 +8,6 @@ if exist venv\Scripts\activate.bat (
 )
 
 REM Iniciar sistema
-C:\Users\jvarela\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe -m core.fuzzing_engine
+D:\security_fuzzing_system\venv\Scripts\python.exe -m core.fuzzing_engine
 
 pause

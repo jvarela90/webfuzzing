@@ -1223,7 +1223,7 @@ ALERTS_TEMPLATE = '''<!DOCTYPE html>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
             <a class="navbar-brand text-white fw-bold" href="/">
-                <i class="fas fa-shield-alt"></i> Security Dashboard
+                <i class="fas fa-shield-alt"></i> Panel de Control de URL - DCEA
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-white" href="/">Dashboard</a>
@@ -1332,7 +1332,7 @@ ALERT_DETAIL_TEMPLATE = '''<!DOCTYPE html>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand text-white fw-bold" href="/">Security Dashboard</a>
+            <a class="navbar-brand text-white fw-bold" href="/">Panel de Control de URL - DCEA</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-white" href="/">Dashboard</a>
                 <a class="nav-link text-white" href="/alerts">Alertas</a>
@@ -1474,7 +1474,7 @@ FINDINGS_TEMPLATE = '''<!DOCTYPE html>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand text-white fw-bold" href="/">Security Dashboard</a>
+            <a class="navbar-brand text-white fw-bold" href="/">Panel de Control de URL - DCEA</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-white" href="/">Dashboard</a>
                 <a class="nav-link text-white" href="/alerts">Alertas</a>
@@ -1602,7 +1602,7 @@ ANALYTICS_TEMPLATE = '''<!DOCTYPE html>
 <body>
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <a class="navbar-brand text-white fw-bold" href="/">Security Dashboard</a>
+            <a class="navbar-brand text-white fw-bold" href="/">Panel de Control de URL - DCEA</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link text-white" href="/">Dashboard</a>
                 <a class="nav-link text-white" href="/alerts">Alertas</a>
