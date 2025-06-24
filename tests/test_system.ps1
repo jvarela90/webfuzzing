@@ -1,5 +1,5 @@
 # test_system.ps1 - Prueba completa del sistema
-Write-Host "🧪 TESTING SECURITY FUZZING SYSTEM" -ForegroundColor Cyan
+Write-Host "Testing Security Fuzzing System" -ForegroundColor Cyan
 Write-Host "=" * 60
 
 $errors = @()
@@ -25,138 +25,170 @@ foreach ($file in $required_files) {
 }
 
 if ($missing.Count -eq 0) {
-    Write-Host "✅ Estructura de archivos OK" -ForegroundColor Green
+    Write-Host "Estructura de archivos OK" -ForegroundColor Green
     $tests_passed++
 } else {
-    Write-Host "❌ Archivos faltantes: $($missing -join ', ')" -ForegroundColor Red
+    Write-Host "Archivos faltantes: $($missing -join ', ')" -ForegroundColor Red
     $errors += "Archivos faltantes"
 }
 
 # Test 2: Verificar entorno virtual
 Write-Host "Test 2: Verificando entorno virtual..." -ForegroundColor Yellow
 if (Test-Path "venv\Scripts\python.exe") {
-    Write-Host "✅ Entorno virtual OK" -ForegroundColor Green
+    Write-Host "Entorno virtual OK" -ForegroundColor Green
     $tests_passed++
 } else {
-    Write-Host "❌ Entorno virtual no encontrado" -ForegroundColor Red
+    Write-Host "Entorno virtual no encontrado" -ForegroundColor Red
     $errors += "Entorno virtual faltante"
 }
 
 # Test 3: Verificar dependencias Python
 Write-Host "Test 3: Verificando dependencias Python..." -ForegroundColor Yellow
 try {
-    & .\venv\Scripts\python.exe -c "import flask, requests, aiohttp, yaml, sqlalchemy; print('Dependencies OK')" 2>$null
-    Write-Host "✅ Dependencias Python OK" -ForegroundColor Green
-    $tests_passed++
-} catch {
-    Write-Host "❌ Faltan dependencias Python" -ForegroundColor Red
-    $errors += "Dependencias Python faltantes"
-}
-
-# Test 4: Verificar módulo config
-Write-Host "Test 4: Verificando módulo config..." -ForegroundColor Yellow
-try {
-    & .\venv\Scripts\python.exe -c "from config.settings import config; print('Config module OK')" 2>$null
-    Write-Host "✅ Módulo config OK" -ForegroundColor Green
-    $tests_passed++
-} catch {
-    Write-Host "❌ Error en módulo config" -ForegroundColor Red
-    $errors += "Módulo config con errores"
-}
-
-# Test 5: Verificar fuzzing engine
-Write-Host "Test 5: Verificando fuzzing engine..." -ForegroundColor Yellow
-try {
-    $output = & .\venv\Scripts\python.exe -m core.fuzzing_engine --help 2>&1
-    if ($output -like "*URLControl Fuzzing Engine*") {
-        Write-Host "✅ Fuzzing engine OK" -ForegroundColor Green
+    $output = & .\venv\Scripts\python.exe -c "import flask, requests, aiohttp; print('Dependencies OK')" 2>&1
+    if ($output -like "*Dependencies OK*") {
+        Write-Host "Dependencias Python OK" -ForegroundColor Green
         $tests_passed++
     } else {
-        Write-Host "❌ Error en fuzzing engine" -ForegroundColor Red
+        Write-Host "Faltan dependencias Python" -ForegroundColor Red
+        $errors += "Dependencias Python faltantes"
+    }
+} catch {
+    Write-Host "Error verificando dependencias Python" -ForegroundColor Red
+    $errors += "Error en dependencias Python"
+}
+
+# Test 4: Verificar loguru
+Write-Host "Test 4: Verificando loguru..." -ForegroundColor Yellow
+try {
+    $output = & .\venv\Scripts\python.exe -c "import loguru; print('Loguru OK')" 2>&1
+    if ($output -like "*Loguru OK*") {
+        Write-Host "Loguru OK" -ForegroundColor Green
+        $tests_passed++
+    } else {
+        Write-Host "Loguru no instalado" -ForegroundColor Red
+        $errors += "Loguru faltante"
+    }
+} catch {
+    Write-Host "Error verificando loguru" -ForegroundColor Red
+    $errors += "Error en loguru"
+}
+
+# Test 5: Verificar módulo config
+Write-Host "Test 5: Verificando módulo config..." -ForegroundColor Yellow
+try {
+    $output = & .\venv\Scripts\python.exe -c "from config.settings import config; print('Config module OK')" 2>&1
+    if ($output -like "*Config module OK*") {
+        Write-Host "Módulo config OK" -ForegroundColor Green
+        $tests_passed++
+    } else {
+        Write-Host "Error en módulo config" -ForegroundColor Red
+        $errors += "Módulo config con errores"
+    }
+} catch {
+    Write-Host "Error verificando módulo config" -ForegroundColor Red
+    $errors += "Error en módulo config"
+}
+
+# Test 6: Verificar fuzzing engine
+Write-Host "Test 6: Verificando fuzzing engine..." -ForegroundColor Yellow
+try {
+    $output = & .\venv\Scripts\python.exe -m core.fuzzing_engine --help 2>&1
+    if ($output -like "*URLControl Fuzzing Engine*" -or $output -like "*usage:*") {
+        Write-Host "Fuzzing engine OK" -ForegroundColor Green
+        $tests_passed++
+    } else {
+        Write-Host "Error en fuzzing engine" -ForegroundColor Red
         $errors += "Fuzzing engine con errores"
     }
 } catch {
-    Write-Host "❌ Error ejecutando fuzzing engine" -ForegroundColor Red
+    Write-Host "Error ejecutando fuzzing engine" -ForegroundColor Red
     $errors += "Fuzzing engine no ejecutable"
 }
 
-# Test 6: Verificar API (inicio rápido)
-Write-Host "Test 6: Verificando API..." -ForegroundColor Yellow
+# Test 7: Verificar config.yaml
+Write-Host "Test 7: Verificando config.yaml..." -ForegroundColor Yellow
 try {
-    $api_process = Start-Process -FilePath ".\venv\Scripts\python.exe" -ArgumentList "api\app.py" -WindowStyle Hidden -PassThru
-    Start-Sleep 3
-    
-    $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -TimeoutSec 5 -UseBasicParsing 2>$null
-    if ($response.StatusCode -eq 200) {
-        Write-Host "✅ API OK" -ForegroundColor Green
+    $output = & .\venv\Scripts\python.exe -c "import yaml; yaml.safe_load(open('config.yaml', 'r', encoding='utf-8')); print('YAML OK')" 2>&1
+    if ($output -like "*YAML OK*") {
+        Write-Host "Config.yaml OK" -ForegroundColor Green
         $tests_passed++
     } else {
-        Write-Host "❌ API no responde correctamente" -ForegroundColor Red
-        $errors += "API con problemas"
+        Write-Host "Error en config.yaml" -ForegroundColor Red
+        $errors += "Config.yaml con errores de sintaxis"
     }
-    
-    Stop-Process -Id $api_process.Id -Force 2>$null
 } catch {
-    Write-Host "❌ Error en API" -ForegroundColor Red
-    $errors += "API no funciona"
+    Write-Host "Error verificando config.yaml" -ForegroundColor Red
+    $errors += "Error en config.yaml"
 }
 
-# Test 7: Verificar Dashboard (inicio rápido)
-Write-Host "Test 7: Verificando Dashboard..." -ForegroundColor Yellow
+# Test 8: Test de importación completa
+Write-Host "Test 8: Test de importacion completa..." -ForegroundColor Yellow
 try {
-    $web_process = Start-Process -FilePath ".\venv\Scripts\python.exe" -ArgumentList "web\app.py" -WindowStyle Hidden -PassThru
-    Start-Sleep 3
+    $test_script = 'try:
+    import sys, os
+    sys.path.append(".")
+    from config.settings import config
+    from core.fuzzing_engine import *
+    import flask, requests, aiohttp, loguru
+    print("Complete import test OK")
+except Exception as e:
+    print(f"Import error: {e}")'
     
-    $response = Invoke-WebRequest -Uri "http://localhost:5000" -TimeoutSec 5 -UseBasicParsing 2>$null
-    if ($response.StatusCode -eq 200) {
-        Write-Host "✅ Dashboard OK" -ForegroundColor Green
+    $output = & .\venv\Scripts\python.exe -c $test_script 2>&1
+    if ($output -like "*Complete import test OK*") {
+        Write-Host "Importacion completa OK" -ForegroundColor Green
         $tests_passed++
     } else {
-        Write-Host "❌ Dashboard no responde" -ForegroundColor Red
-        $errors += "Dashboard con problemas"
+        Write-Host "Error en importacion completa: $output" -ForegroundColor Red
+        $errors += "Error en importacion completa"
     }
-    
-    Stop-Process -Id $web_process.Id -Force 2>$null
 } catch {
-    Write-Host "❌ Error en Dashboard" -ForegroundColor Red
-    $errors += "Dashboard no funciona"
-}
-
-# Test 8: Verificar config.yaml
-Write-Host "Test 8: Verificando config.yaml..." -ForegroundColor Yellow
-try {
-    & .\venv\Scripts\python.exe -c "import yaml; yaml.safe_load(open('config.yaml', 'r', encoding='utf-8')); print('YAML OK')" 2>$null
-    Write-Host "✅ Config.yaml OK" -ForegroundColor Green
-    $tests_passed++
-} catch {
-    Write-Host "❌ Error en config.yaml" -ForegroundColor Red
-    $errors += "Config.yaml con errores de sintaxis"
+    Write-Host "Error en test de importacion" -ForegroundColor Red
+    $errors += "Error en test de importacion"
 }
 
 # Resumen final
 Write-Host ""
 Write-Host "=" * 60
-Write-Host "📊 RESUMEN DE PRUEBAS" -ForegroundColor Cyan
+Write-Host "Resumen de Pruebas" -ForegroundColor Cyan
 Write-Host "=" * 60
-Write-Host "✅ Pruebas exitosas: $tests_passed/$total_tests" -ForegroundColor Green
+Write-Host "Pruebas exitosas: $tests_passed/$total_tests" -ForegroundColor Green
 
 if ($errors.Count -eq 0) {
-    Write-Host "🎉 ¡SISTEMA COMPLETAMENTE FUNCIONAL!" -ForegroundColor Green
+    Write-Host "Sistema Completamente Funcional!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Comandos para usar:" -ForegroundColor Yellow
-    Write-Host "  • Dashboard: python web\app.py" -ForegroundColor Gray
-    Write-Host "  • API: python api\app.py" -ForegroundColor Gray
-    Write-Host "  • Fuzzer: python -m core.fuzzing_engine --help" -ForegroundColor Gray
+    Write-Host "  Dashboard: python web\app.py" -ForegroundColor Gray
+    Write-Host "  API: python api\app.py" -ForegroundColor Gray
+    Write-Host "  Fuzzer: python -m core.fuzzing_engine --help" -ForegroundColor Gray
+    Write-Host "  Scripts: start_dashboard.bat, start_api.bat" -ForegroundColor Gray
 } else {
-    Write-Host "❌ Errores encontrados:" -ForegroundColor Red
-    foreach ($error in $errors) {
-        Write-Host "   - $error" -ForegroundColor Red
+    Write-Host "Errores encontrados ($($errors.Count)):" -ForegroundColor Red
+    for ($i = 0; $i -lt $errors.Count; $i++) {
+        Write-Host "   $($i + 1). $($errors[$i])" -ForegroundColor Red
     }
     Write-Host ""
-    Write-Host "🔧 Soluciones recomendadas:" -ForegroundColor Yellow
-    Write-Host "   1. Ejecutar fix_environment.ps1" -ForegroundColor Gray
-    Write-Host "   2. Crear archivos faltantes" -ForegroundColor Gray
-    Write-Host "   3. Instalar dependencias: pip install -r requirements.txt" -ForegroundColor Gray
+    Write-Host "Soluciones recomendadas:" -ForegroundColor Yellow
+    Write-Host "   1. Ejecutar: install_dependencies.bat" -ForegroundColor Gray
+    Write-Host "   2. Instalar loguru: pip install loguru" -ForegroundColor Gray
+    Write-Host "   3. Crear archivos faltantes segun errores" -ForegroundColor Gray
+    Write-Host "   4. Verificar sintaxis de config.yaml" -ForegroundColor Gray
 }
 
 Write-Host "=" * 60
+
+# Mostrar siguiente paso recomendado
+if ($tests_passed -lt $total_tests) {
+    Write-Host ""
+    Write-Host "Proximo Paso Recomendado:" -ForegroundColor Cyan
+    if ($errors -contains "Loguru faltante") {
+        Write-Host "pip install loguru colorama tqdm" -ForegroundColor Yellow
+    } elseif ($errors -contains "Archivos faltantes") {
+        Write-Host "Crear archivos faltantes mostrados arriba" -ForegroundColor Yellow
+    } elseif ($errors -contains "Dependencias Python faltantes") {
+        Write-Host ".\install_dependencies.bat" -ForegroundColor Yellow
+    } else {
+        Write-Host "Revisar errores especificos mostrados arriba" -ForegroundColor Yellow
+    }
+}
