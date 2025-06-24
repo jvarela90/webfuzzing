@@ -2,11 +2,11 @@
 # Formato: https://dominio o dominio:puerto
 
 # Dominios seguros para pruebas
-https://httpbin.org
-https://jsonplaceholder.typicode.com
-https://httpstat.us
+#https://httpbin.org
+#https://jsonplaceholder.typicode.com
+#https://httpstat.us
 
 # Ejemplos para uso real (descomentary y modificar):
-# https://tu-empresa.com
-# https://app.tu-empresa.com
-# https://api.tu-empresa.com
+ejercito.mil.ar
+colegiomilitar.mil.ar
+cge.mil.ar

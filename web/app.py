@@ -26,6 +26,9 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.utils
 
+from core.domain_management import domain_bp
+
+
 # Configurar encoding para Windows
 if platform.system() == "Windows":
     import sys
@@ -1710,3 +1713,5 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"\n❌ Error ejecutando dashboard: {e}")
         print("💡 Verificar dependencias: pip install flask flask-socketio plotly pandas")
+
+app.register_blueprint(domain_bp)

@@ -1,15 +1,16 @@
 # ==========================================
-# Security Fuzzing System - Requirements  
+# URLControl Security System - Requirements
+# Versión Consolidada - Completa y Optimizada
 # ==========================================
 
 # === CORE WEB FRAMEWORK ===
 flask>=2.3.0,<3.0.0
-flask-cors>=4.0.0
-flask-restful>=0.3.10
-flask-jwt-extended>=4.5.0
-flask-limiter>=3.0.0
-flask-sqlalchemy>=3.0.5
-flask-socketio>=5.3.0
+flask-cors>=4.0.0,<5.0.0
+flask-restful>=0.3.10,<1.0.0
+flask-jwt-extended>=4.5.0,<5.0.0
+flask-limiter>=3.0.0,<4.0.0
+flask-sqlalchemy>=3.0.5,<4.0.0
+flask-socketio>=5.3.0,<6.0.0
 werkzeug>=2.3.0,<3.0.0
 jinja2>=3.1.0,<4.0.0
 
@@ -18,23 +19,25 @@ requests>=2.31.0,<3.0.0
 aiohttp>=3.8.5,<4.0.0
 httpx>=0.24.1,<1.0.0
 
-# === DATABASE ===
+# === DATABASE & MIGRATIONS ===
 sqlalchemy>=2.0.20,<3.0.0
 alembic>=1.11.3,<2.0.0
 
 # === FUZZING & SECURITY ===
-beautifulsoup4>=4.12.2
+beautifulsoup4>=4.12.2,<5.0.0
 selenium>=4.11.2,<5.0.0
-python-nmap>=0.7.1
+python-nmap>=0.7.1,<1.0.0
 cryptography>=41.0.0,<42.0.0
 bcrypt>=4.0.0,<5.0.0
 
-# === DATA PROCESSING ===
+# === DATA PROCESSING & ANALYSIS ===
 pandas>=2.0.0,<3.0.0
 numpy>=1.24.0,<2.0.0
-plotly>=5.15.0,<6.0.0
 scikit-learn>=1.3.0,<2.0.0
 joblib>=1.3.0,<2.0.0
+
+# === VISUALIZATION ===
+plotly>=5.15.0,<6.0.0
 
 # === UTILITIES ===
 pyyaml>=6.0.1,<7.0.0
@@ -64,58 +67,54 @@ pytest-asyncio>=0.21.1,<1.0.0
 black>=23.7.0,<24.0.0
 flake8>=6.0.0,<7.0.0
 
+# === ADDITIONAL SECURITY TOOLS (OPTIONAL) ===
+# Descomenta las que necesites según tus requerimientos específicos:
+# wfuzz>=3.1.0,<4.0.0              # Advanced web fuzzing
+# dnspython>=2.4.0,<3.0.0          # DNS resolution and manipulation
+# pyopenssl>=23.2.0,<24.0.0        # SSL/TLS certificate handling
+# paramiko>=3.3.0,<4.0.0           # SSH connections and SFTP
+# scapy>=2.5.0,<3.0.0              # Network packet manipulation
+# censys>=2.2.0,<3.0.0             # Censys API integration
+# shodan>=1.29.0,<2.0.0            # Shodan API integration
 
-# === CORE WEB FRAMEWORK ===
-flask>=2.3.0,<3.0.0
-flask-cors>=4.0.0,<5.0.0
-flask-restful>=0.3.10,<1.0.0
-flask-socketio>=5.3.0,<6.0.0
-werkzeug>=2.3.0,<3.0.0
-jinja2>=3.1.0,<4.0.0
+# === WEB DRIVERS (SELENIUM) ===
+# webdriver-manager>=4.0.0,<5.0.0  # Automatic webdriver management
 
-# === HTTP & ASYNC ===
-requests>=2.31.0,<3.0.0
-aiohttp>=3.8.5,<4.0.0
-httpx>=0.24.1,<1.0.0
+# === DATABASE DRIVERS (OPTIONAL) ===
+# Descomenta según tu base de datos:
+# psycopg2-binary>=2.9.0,<3.0.0    # PostgreSQL
+# pymysql>=1.1.0,<2.0.0            # MySQL/MariaDB
+# redis>=4.6.0,<5.0.0              # Redis cache
 
-# === DATABASE ===
-sqlalchemy>=2.0.20,<3.0.0
+# === API INTEGRATIONS (OPTIONAL) ===
+# virustotal-api>=1.1.11,<2.0.0    # VirusTotal API
+# python-whois>=0.8.0,<1.0.0       # WHOIS lookups
 
-# === DATA PROCESSING (REQUERIDO POR DASHBOARD) ===
-pandas>=2.0.0,<3.0.0
-numpy>=1.24.0,<2.0.0
+# === ADDITIONAL MONITORING (OPTIONAL) ===
+# prometheus-client>=0.17.0,<1.0.0 # Prometheus metrics
+# grafana-api>=1.0.0,<2.0.0        # Grafana integration
 
-# === VISUALIZACIÓN ===
-plotly>=5.15.0,<6.0.0
+# === MACHINE LEARNING (OPTIONAL) ===
+# tensorflow>=2.13.0,<3.0.0        # Deep learning for pattern recognition
+# torch>=2.0.0,<3.0.0              # PyTorch for ML models
 
-# === FUZZING & SECURITY ===
-beautifulsoup4>=4.12.2
-cryptography>=41.0.0,<42.0.0
-
-# === UTILITIES ===
-pyyaml>=6.0.1,<7.0.0
-python-dotenv>=1.0.0,<2.0.0
-colorama>=0.4.6,<1.0.0
-tqdm>=4.65.0,<5.0.0
-
-# === LOGGING & MONITORING ===
-loguru>=0.7.0,<1.0.0
-
-# === DEVELOPMENT & TESTING ===
-pytest>=7.4.0,<8.0.0
-black>=23.7.0,<24.0.0
-flake8>=6.0.0,<7.0.0
-
-# === SPECIFIC FUZZING TOOLS (OPTIONAL) ===
-# wfuzz>=3.1.0
-# dnspython>=2.4.0
-# pyopenssl>=23.2.0
-# paramiko>=3.3.0
-
-# === OPTIONAL DEPENDENCIES ===
-# Descomenta las que necesites:
-# selenium>=4.11.2        # Para web scraping con navegador
-# python-nmap>=0.7.1      # Para escaneo de puertos
-# bcrypt>=4.0.0           # Para encriptación de contraseñas
-# python-telegram-bot>=20.0.0  # Para notificaciones Telegram
-# nltk>=3.8.0             # Para procesamiento de texto
+# ==========================================
+# INSTALLATION NOTES:
+# ==========================================
+# 1. Create virtual environment:
+#    python -m venv venv
+#    source venv/bin/activate  # Linux/Mac
+#    venv\Scripts\activate     # Windows
+#
+# 2. Install requirements:
+#    pip install -r requirements.txt
+#
+# 3. For Selenium support, you may need:
+#    - Chrome/Chromium browser
+#    - ChromeDriver (can be auto-managed with webdriver-manager)
+#
+# 4. For advanced features, uncomment optional dependencies as needed
+#
+# 5. For production deployment, consider pinning exact versions:
+#    pip freeze > requirements-prod.txt
+# ==========================================
