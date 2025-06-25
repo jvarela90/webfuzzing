@@ -1,0 +1,21 @@
+# 1. Navegar a tu directorio
+cd D:\security_fuzzing_system
+
+# 2. Activar entorno virtual
+venv\Scripts\activate
+
+# 3. Actualizar pip
+python -m pip install --upgrade pip
+
+# 4. Reemplaza tu requirements.txt con el contenido del artifact de arriba
+# Luego instala las dependencias correctas:
+pip install aiohttp asyncio beautifulsoup4 flask-cors flask-socketio
+pip install requests httpx selenium python-nmap sqlalchemy
+pip install pyyaml python-dotenv colorama tqdm loguru
+pip install pandas plotly jinja2 cryptography
+
+# 5. Verificar que aiohttp se instaló
+python -c "import aiohttp; print('✅ aiohttp funciona')"
+
+# 6. Probar el fuzzing engine
+python -c "from core.fuzzing_engine import *; print('✅ Fuzzing engine importa correctamente')"

@@ -1,0 +1,89 @@
+# Configuración básica del sistema de fuzzing
+system:
+  name: "Security Fuzzing System"
+  version: "1.0.0"
+  debug: true
+  log_level: "INFO"
+
+# Configuración de la base de datos
+database:
+  type: "sqlite"
+  path: "web/data/fuzzing.db"
+  backup_enabled: true
+  backup_interval: 24  # horas
+
+# Configuración del servidor web
+web:
+  host: "0.0.0.0"
+  port: 5000
+  secret_key: "tu-clave-secreta-aqui"
+  enable_debug: true
+
+# Configuración de la API
+api:
+  host: "0.0.0.0"
+  port: 8000
+  enable_cors: true
+  rate_limit: 100  # requests por minuto
+
+# Configuración del fuzzing
+fuzzing:
+  concurrent_requests: 50
+  timeout: 10  # segundos
+  user_agent: "SecurityFuzzer/1.0"
+  retry_attempts: 3
+  delay_between_requests: 0.1  # segundos
+
+# Wordlists por defecto
+wordlists:
+  directories: "data/wordlists/directories.txt"
+  files: "data/wordlists/files.txt"
+  parameters: "data/wordlists/parameters.txt"
+  subdomains: "data/wordlists/subdomains.txt"
+
+# Configuración de notificaciones
+notifications:
+  enabled: false
+  slack:
+    webhook_url: ""
+    channel: "#security"
+  email:
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+    to_address: ""
+
+# Configuración de herramientas externas
+tools:
+  ffuf:
+    path: "tools/ffuf/ffuf.exe"
+    enabled: true
+  dirsearch:
+    path: "tools/dirsearch/dirsearch.py"
+    enabled: true
+  nuclei:
+    path: "tools/nuclei/nuclei.exe"
+    enabled: false
+
+# Configuración de logging
+logging:
+  level: "INFO"
+  file: "logs/fuzzing.log"
+  max_size: "10MB"
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Configuración de seguridad
+security:
+  max_scan_duration: 3600  # segundos (1 hora)
+  blacklisted_domains:
+    - "localhost"
+    - "127.0.0.1"
+    - "internal.company.com"
+  allowed_ports:
+    - 80
+    - 443
+    - 8000
+    - 8080
+    - 8443

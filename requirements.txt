@@ -67,6 +67,47 @@ pytest-asyncio>=0.21.1,<1.0.0
 black>=23.7.0,<24.0.0
 flake8>=6.0.0,<7.0.0
 
+# Web Framework
+flask>=2.3.0
+flask-cors>=4.0.0
+flask-socketio>=5.3.0
+
+# HTTP y Async
+requests>=2.31.0
+aiohttp>=3.8.5
+httpx>=0.24.1
+
+# Fuzzing y Seguridad
+beautifulsoup4>=4.12.2
+selenium>=4.11.2
+python-nmap>=0.7.1
+
+# Base de datos (sqlite3 viene incluido en Python)
+sqlalchemy>=2.0.20
+alembic>=1.11.3
+
+# Utilidades
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+colorama>=0.4.6
+tqdm>=4.65.0
+
+# Logging y monitoreo
+loguru>=0.7.0
+
+# Desarrollo y testing
+pytest>=7.4.0
+black>=23.7.0
+flake8>=6.0.0
+
+# Procesamiento de datos
+pandas>=2.0.3
+plotly>=5.15.0
+jinja2>=3.1.2
+
+# Criptografía y seguridad
+cryptography>=41.0.3
+
 # === ADDITIONAL SECURITY TOOLS (OPTIONAL) ===
 # Descomenta las que necesites según tus requerimientos específicos:
 # wfuzz>=3.1.0,<4.0.0              # Advanced web fuzzing
