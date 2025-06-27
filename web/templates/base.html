@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WebFuzzing Pro{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .critical-badge {
+            background-color: #dc3545;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .status-new {
+            color: #dc3545;
+        }
+        .status-investigating {
+            color: #ffc107;
+        }
+        .status-resolved {
+            color: #28a745;
+        }
+        .finding-row.critical {
+            background-color: #fff5f5;
+            border-left: 4px solid #dc3545;
+        }
+        .alert-counter {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        .real-time-indicator {
+            width: 10px;
+            height: 10px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-search"></i> WebFuzzing Pro
+                <div class="real-time-indicator" id="connectionStatus"></div>
+            </a>
+            
+            <div class="navbar-nav">
+                <a class="nav-link" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('findings') }}">
+                    <i class="fas fa-list"></i> Hallazgos
+                </a>
+                <a class="nav-link" href="{{ url_for('alerts') }}">
+                    <i class="fas fa-exclamation-triangle"></i> Alertas
+                    <span class="alert-counter" id="alertCounter" style="display: none;">0</span>
+                </a>
+                <a class="nav-link" href="{{ url_for('domains') }}">
+                    <i class="fas fa-globe"></i> Dominios
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Socket.IO Connection -->
+    <script>
+        const socket = io();
+        
+        socket.on('connect', function() {
+            console.log('Conectado al servidor');
+            document.getElementById('connectionStatus').style.backgroundColor = '#28a745';
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Desconectado del servidor');
+            document.getElementById('connectionStatus').style.backgroundColor = '#dc3545';
+        });
+        
+        socket.on('new_finding', function(data) {
+            // Mostrar notificación de nuevo hallazgo
+            if (data.is_critical) {
+                showNotification('Nuevo hallazgo crítico: ' + data.path, 'danger');
+            }
+            
+            // Actualizar contador si estamos en la página correspondiente
+            updatePageData();
+        });
+        
+        socket.on('new_alert', function(data) {
+            // Actualizar contador de alertas
+            const counter = document.getElementById('alertCounter');
+            if (counter) {
+                const count = parseInt(counter.textContent) + 1;
+                counter.textContent = count;
+                counter.style.display = 'inline';
+            }
+            
+            showNotification('Nueva alerta: ' + data.title, 'warning');
+        });
+        
+        function showNotification(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        function updatePageData() {
+            // Actualizar datos de la página actual
+            if (window.location.pathname === '/') {
+                updateDashboardStats();
+            }
+        }
+        
+        function updateDashboardStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizar estadísticas del dashboard
+                    const elements = {
+                        'totalDomains': data.total_domains,
+                        'recentFindings': data.recent_findings,
+                        'criticalFindings': data.critical_findings,
+                        'newAlerts': data.new_alerts
+                    };
+                    
+                    for (const [id, value] of Object.entries(elements)) {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.textContent = value;
+                        }
+                    }
+                    
+                    // Actualizar contador de alertas
+                    const counter = document.getElementById('alertCounter');
+                    if (counter && data.new_alerts > 0) {
+                        counter.textContent = data.new_alerts;
+                        counter.style.display = 'inline';
+                    }
+                });
+        }
+        
+        // Actualizar estadísticas cada 30 segundos
+        setInterval(updateDashboardStats, 30000);
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

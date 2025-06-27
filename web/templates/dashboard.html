@@ -1,0 +1,221 @@
+<!-- web/templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - WebFuzzing Pro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard de Seguridad Web</h1>
+        <p class="text-muted">Monitoreo en tiempo real de fuzzing web y análisis de seguridad</p>
+    </div>
+</div>
+
+<!-- Estadísticas principales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="totalDomains">{{ stats.total_domains }}</h4>
+                        <p class="card-text">Dominios Activos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-globe fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="recentFindings">{{ stats.recent_findings }}</h4>
+                        <p class="card-text">Hallazgos (24h)</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="criticalFindings">{{ stats.critical_findings }}</h4>
+                        <p class="card-text">Hallazgos Críticos</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="newAlerts">{{ stats.new_alerts }}</h4>
+                        <p class="card-text">Alertas Nuevas</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-bell fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos y datos -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Actividad por Hora (Últimas 24h)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-circle"></i> Alertas Críticas</h5>
+            </div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                {% if critical_alerts %}
+                    {% for alert in critical_alerts %}
+                    <div class="alert alert-{{ 'danger' if alert.severity == 'high' else 'warning' }} alert-sm mb-2">
+                        <strong>{{ alert.title }}</strong><br>
+                        <small>{{ alert.created_at }}</small>
+                        <div class="mt-1">
+                            <a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-sm btn-outline-dark">Ver</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No hay alertas críticas pendientes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hallazgos recientes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-clock"></i> Hallazgos Recientes</h5>
+                <a href="{{ url_for('findings') }}" class="btn btn-primary btn-sm">Ver Todos</a>
+            </div>
+            <div class="card-body">
+                {% if recent_findings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Dominio</th>
+                                <th>Ruta</th>
+                                <th>Estado</th>
+                                <th>Criticidad</th>
+                                <th>Descubierto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for finding in recent_findings[:10] %}
+                            <tr class="finding-row {{ 'critical' if finding.is_critical else '' }}">
+                                <td>{{ finding.domain }}</td>
+                                <td>
+                                    <code>{{ finding.path }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if finding.status_code == 200 else 'warning' }}">
+                                        {{ finding.status_code }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if finding.is_critical %}
+                                        <span class="critical-badge">CRÍTICO</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ finding.discovered_at }}</small>
+                                </td>
+                                <td>
+                                    <a href="{{ finding.full_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No hay hallazgos recientes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gráfico de actividad
+const activityData = {{ activity_data | tojsonfilter | safe }};
+const ctx = document.getElementById('activityChart').getContext('2d');
+
+const hours = Array.from({length: 24}, (_, i) => i.toString().padStart(2, '0'));
+const counts = hours.map(hour => {
+    const data = activityData.find(d => d.hour === hour);
+    return data ? data.count : 0;
+});
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: hours.map(h => h + ':00'),
+        datasets: [{
+            label: 'Hallazgos por Hora',
+            data: counts,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Auto-refresh cada 60 segundos
+setInterval(() => {
+    location.reload();
+}, 60000);
+</script>
+{% endblock %}

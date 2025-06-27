@@ -1,0 +1,295 @@
+<!-- web/templates/domains.html CORREGIDO -->
+{% extends "base.html" %}
+
+{% block title %}Dominios - WebFuzzing Pro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-globe"></i> Gestión de Dominios</h1>
+                <p class="text-muted">Administra los dominios objetivo para fuzzing web</p>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDomainModal">
+                <i class="fas fa-plus"></i> Agregar Dominio
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de dominios -->
+<div class="row">
+    {% if domains %}
+        {% for domain in domains %}
+        {% set critical_percent = ((domain.critical_paths or 0) / (domain.total_paths or 1) * 100) | int %}
+        {% set normal_percent = 100 - critical_percent %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-globe text-primary"></i>
+                        {{ domain.domain }}
+                    </h6>
+                    <span class="badge bg-{{ 'success' if domain.status == 'active' else 'secondary' }}">
+                        {{ domain.status.title() }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="fw-bold text-primary">{{ domain.total_paths or 0 }}</div>
+                            <small class="text-muted">Rutas</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold text-danger">{{ domain.critical_paths or 0 }}</div>
+                            <small class="text-muted">Críticas</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold text-info">{{ domain.protocol.upper() }}</div>
+                            <small class="text-muted">:{{ domain.port }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">Último escaneo:</small><br>
+                        <small>{{ domain.last_scan.split()[0] if domain.last_scan else 'Nunca' }}</small>
+                    </div>
+                    
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-danger" style="width: {{ critical_percent }}%"></div>
+                        <div class="progress-bar bg-success" style="width: {{ normal_percent }}%"></div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100">
+                        <a href="{{ url_for('domain_detail', domain_id=domain.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i> Ver
+                        </a>
+                        <button class="btn btn-outline-success btn-sm domain-action-btn" 
+                                data-domain-id="{{ domain.id }}" 
+                                data-action="scan">
+                            <i class="fas fa-search"></i> Escanear
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm domain-action-btn" 
+                                data-domain-id="{{ domain.id }}" 
+                                data-action="delete">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-globe fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No hay dominios configurados</h5>
+            <p class="text-muted">Agrega dominios para comenzar el fuzzing web</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDomainModal">
+                <i class="fas fa-plus"></i> Agregar Primer Dominio
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal para agregar dominio -->
+<div class="modal fade" id="addDomainModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Nuevo Dominio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addDomainForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="domainName" class="form-label">Dominio *</label>
+                        <input type="text" class="form-control" id="domainName" required 
+                               placeholder="ejemplo.com">
+                        <div class="form-text">Solo el nombre del dominio, sin protocolo</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="protocol" class="form-label">Protocolo</label>
+                            <select class="form-select" id="protocol">
+                                <option value="https">HTTPS</option>
+                                <option value="http">HTTP</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="port" class="form-label">Puerto</label>
+                            <input type="number" class="form-control" id="port" value="443" 
+                                   min="1" max="65535">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="scanNow" checked>
+                            <label class="form-check-label" for="scanNow">
+                                Ejecutar escaneo inicial inmediatamente
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Importante:</strong> Solo realiza fuzzing en dominios que te pertenezcan 
+                        o tengas autorización explícita para probar.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Agregar Dominio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar formulario de agregar dominio
+    document.getElementById('addDomainForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const domain = document.getElementById('domainName').value.trim();
+        const protocol = document.getElementById('protocol').value;
+        const port = parseInt(document.getElementById('port').value);
+        const scanNow = document.getElementById('scanNow').checked;
+        
+        if (!domain) {
+            alert('Por favor ingresa un dominio válido');
+            return;
+        }
+        
+        // Agregar dominio via API
+        addDomain(domain, protocol, port, scanNow);
+    });
+
+    // Actualizar puerto según protocolo
+    document.getElementById('protocol').addEventListener('change', function() {
+        const port = document.getElementById('port');
+        if (this.value === 'https') {
+            port.value = 443;
+        } else {
+            port.value = 80;
+        }
+    });
+
+    // Manejar botones de acción de dominios
+    document.querySelectorAll('.domain-action-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const domainId = this.getAttribute('data-domain-id');
+            const action = this.getAttribute('data-action');
+            
+            if (action === 'scan') {
+                scanDomain(domainId);
+            } else if (action === 'delete') {
+                deleteDomain(domainId);
+            }
+        });
+    });
+});
+
+function addDomain(domain, protocol, port, scanNow) {
+    fetch('/api/v1/domains', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': 'api-key-here'
+        },
+        body: JSON.stringify({
+            domain: domain,
+            protocol: protocol,
+            port: port
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert('Dominio agregado exitosamente');
+            
+            if (scanNow && data.domain_id) {
+                // Iniciar escaneo después de un breve delay
+                setTimeout(() => {
+                    scanDomain(data.domain_id);
+                }, 1000);
+            }
+            
+            // Cerrar modal y recargar página
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addDomainModal'));
+            modal.hide();
+            location.reload();
+        } else {
+            alert('Error agregando dominio: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al agregar dominio');
+    });
+}
+
+function scanDomain(domainId) {
+    if (confirm('¿Iniciar escaneo para este dominio?')) {
+        fetch('/api/v1/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': 'api-key-here'
+            },
+            body: JSON.stringify({
+                domain_id: domainId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Escaneo iniciado exitosamente');
+            } else {
+                alert('Error iniciando escaneo: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al iniciar escaneo');
+        });
+    }
+}
+
+function deleteDomain(domainId) {
+    if (confirm('¿Estás seguro de eliminar este dominio? Se perderán todos los datos asociados.')) {
+        fetch('/api/v1/domains/' + domainId, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': 'api-key-here'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Dominio eliminado exitosamente');
+                location.reload();
+            } else {
+                alert('Error eliminando dominio: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión al eliminar dominio');
+        });
+    }
+}
+</script>
+{% endblock %}

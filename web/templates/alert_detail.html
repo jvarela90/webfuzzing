@@ -1,0 +1,597 @@
+<!-- web/templates/alert_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Detalle de Alerta - WebFuzzing Pro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('alerts') }}">Alertas</a></li>
+                <li class="breadcrumb-item active">Alerta #{{ alert.id }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>
+                    <span class="badge bg-{{ 'danger' if alert.severity == 'high' else 'warning' if alert.severity == 'medium' else 'info' }} me-2">
+                        {{ alert.severity.upper() }}
+                    </span>
+                    {{ alert.title }}
+                </h5>
+                <small class="text-muted">ID: {{ alert.id }}</small>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Estado:</strong>
+                        <span class="ms-2 status-{{ alert.status }}">
+                            <i class="fas fa-{{ 'circle' if alert.status == 'new' else 'clock' if alert.status == 'investigating' else 'check-circle' }}"></i>
+                            {{ alert.status.title() }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Tipo:</strong> {{ alert.type }}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Creada:</strong> {{ alert.created_at }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Actualizada:</strong> {{ alert.updated_at or 'Nunca' }}
+                    </div>
+                </div>
+                
+                {% if alert.resolved_at %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Resuelta:</strong> {{ alert.resolved_at }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <hr>
+                
+                <h6>Descripción</h6>
+                <p class="alert alert-light">{{ alert.message }}</p>
+                
+                {% if alert.url %}
+                <h6>URL Afectada</h6>
+                <p>
+                    <a href="{{ alert.url }}" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        {{ alert.url }}
+                    </a>
+                </p>
+                {% endif %}
+                
+                {% if alert.analyst_notes %}
+                <hr>
+                <h6>Notas del Analista</h6>
+                <div class="alert alert-info">
+                    {{ alert.analyst_notes|nl2br }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Panel de acciones -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-tools"></i> Acciones</h6>
+            </div>
+            <div class="card-body">
+                {% if alert.status != 'resolved' %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-warning" onclick="updateStatus('investigating')">
+                        <i class="fas fa-search"></i> Marcar como Investigando
+                    </button>
+                    <button class="btn btn-success" onclick="updateStatus('resolved')">
+                        <i class="fas fa-check"></i> Marcar como Resuelta
+                    </button>
+                </div>
+                <hr>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="analystNotes" class="form-label">Agregar Notas:</label>
+                    <textarea class="form-control" id="analystNotes" rows="4" placeholder="Comentarios del analista...">{{ alert.analyst_notes or '' }}</textarea>
+                </div>
+                
+                <button class="btn btn-primary w-100" onclick="saveNotes()">
+                    <i class="fas fa-save"></i> Guardar Notas
+                </button>
+                
+                {% if alert.url %}
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{{ alert.url }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="fas fa-eye"></i> Ver URL
+                    </a>
+                    <button class="btn btn-outline-info" onclick="analyzeUrl()">
+                        <i class="fas fa-search-plus"></i> Analizar URL
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Historial de cambios -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-history"></i> Historial</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Alerta Creada</h6>
+                            <p class="timeline-text">{{ alert.created_at }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if alert.updated_at and alert.updated_at != alert.created_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Última Actualización</h6>
+                            <p class="timeline-text">{{ alert.updated_at }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if alert.resolved_at %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Resuelta</h6>
+                            <p class="timeline-text">{{ alert.resolved_at }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 17px;
+    width: 2px;
+    height: calc(100% + 5px);
+    background-color: #dee2e6;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateStatus(newStatus) {
+    const notes = document.getElementById('analystNotes').value;
+    
+    fetch(`/update_alert/{{ alert.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: newStatus,
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error actualizando alerta: ' + data.error);
+        }
+    });
+}
+
+function saveNotes() {
+    const notes = document.getElementById('analystNotes').value;
+    
+    fetch(`/update_alert/{{ alert.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: '{{ alert.status }}',
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Notas guardadas exitosamente');
+            location.reload();
+        } else {
+            alert('Error guardando notas: ' + data.error);
+        }
+    });
+}
+
+function analyzeUrl() {
+    const url = '{{ alert.url }}';
+    if (url) {
+        // Abrir en nueva ventana para análisis
+        window.open(url, '_blank');
+        
+        // Marcar como investigando si aún es nueva
+        if ('{{ alert.status }}' === 'new') {
+            updateStatus('investigating');
+        }
+    }
+}
+</script>
+{% endblock %}
+
+<!-- web/templates/domain_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ domain.domain }} - WebFuzzing Pro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('domains') }}">Dominios</a></li>
+                <li class="breadcrumb-item active">{{ domain.domain }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Información del dominio -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>
+                    <i class="fas fa-globe"></i> {{ domain.domain }}
+                    <span class="badge bg-{{ 'success' if domain.status == 'active' else 'secondary' }} ms-2">
+                        {{ domain.status.title() }}
+                    </span>
+                </h4>
+                <div>
+                    <button class="btn btn-primary" onclick="runScanDomain()">
+                        <i class="fas fa-search"></i> Escanear Ahora
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6>Información Básica</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Protocolo:</strong> {{ domain.protocol }}</li>
+                            <li><strong>Puerto:</strong> {{ domain.port }}</li>
+                            <li><strong>URL Base:</strong> 
+                                <a href="{{ domain.protocol }}://{{ domain.domain }}:{{ domain.port if domain.port not in [80, 443] else '' }}" target="_blank">
+                                    {{ domain.protocol }}://{{ domain.domain }}{{ ':' + domain.port|string if domain.port not in [80, 443] else '' }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Estadísticas</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Total Rutas:</strong> {{ stats.total_paths or 0 }}</li>
+                            <li><strong>Rutas Críticas:</strong> 
+                                <span class="badge bg-danger">{{ stats.critical_paths or 0 }}</span>
+                            </li>
+                            <li><strong>Tiempo Promedio:</strong> 
+                                {{ "%.2f"|format(stats.avg_response_time or 0) }}s
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Fechas</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Primer Escaneo:</strong> 
+                                {{ stats.first_scan.split()[0] if stats.first_scan else 'Nunca' }}
+                            </li>
+                            <li><strong>Último Escaneo:</strong> 
+                                {{ stats.last_scan.split()[0] if stats.last_scan else 'Nunca' }}
+                            </li>
+                            <li><strong>Agregado:</strong> {{ domain.created_at.split()[0] }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>Acciones Rápidas</h6>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-sm btn-outline-info" onclick="viewTrends()">
+                                <i class="fas fa-chart-line"></i> Ver Tendencias
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="exportDomainData()">
+                                <i class="fas fa-download"></i> Exportar Datos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico de actividad -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-area"></i> Actividad de Hallazgos (Últimos 7 días)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hallazgos recientes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-list"></i> Hallazgos del Dominio</h5>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="filterFindings('all')">
+                        Todos ({{ findings|length }})
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="filterFindings('critical')">
+                        Críticos ({{ findings|selectattr('is_critical')|list|length }})
+                    </button>
+                    <button class="btn btn-sm btn-outline-success" onclick="filterFindings('recent')">
+                        Recientes (24h)
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if findings %}
+                <div class="table-responsive">
+                    <table class="table table-hover" id="findingsTable">
+                        <thead>
+                            <tr>
+                                <th>Ruta</th>
+                                <th>Estado</th>
+                                <th>Tamaño</th>
+                                <th>Tipo</th>
+                                <th>Tiempo</th>
+                                <th>Criticidad</th>
+                                <th>Descubierto</th>
+                                <th>Última Vez</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for finding in findings %}
+                            <tr class="finding-row {{ 'critical' if finding.is_critical else '' }}" 
+                                data-critical="{{ 'true' if finding.is_critical else 'false' }}"
+                                data-discovered="{{ finding.discovered_at }}">
+                                <td>
+                                    <code>{{ finding.path }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if finding.status_code == 200 else 'warning' if finding.status_code == 403 else 'info' }}">
+                                        {{ finding.status_code }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if finding.content_length %}
+                                        {{ "%.1f"|format(finding.content_length / 1024) }} KB
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ finding.content_type.split(';')[0] if finding.content_type else '-' }}</small>
+                                </td>
+                                <td>
+                                    {% if finding.response_time %}
+                                        {{ "%.2f"|format(finding.response_time) }}s
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if finding.is_critical %}
+                                        <span class="critical-badge">CRÍTICO</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ finding.discovered_at.split()[0] }}</small>
+                                </td>
+                                <td>
+                                    <small>{{ finding.last_seen.split()[0] }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ finding.full_url }}" target="_blank" class="btn btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if finding.is_critical %}
+                                        <button class="btn btn-outline-warning" onclick="createAlert('{{ finding.full_url }}')">
+                                            <i class="fas fa-exclamation"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay hallazgos para este dominio</h5>
+                    <p class="text-muted">Ejecuta un escaneo para comenzar a descubrir rutas</p>
+                    <button class="btn btn-primary" onclick="runScanDomain()">
+                        <i class="fas fa-search"></i> Ejecutar Primer Escaneo
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Gráfico de actividad (simulado - en producción vendría de la API)
+const ctx = document.getElementById('activityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Día 7', 'Día 6', 'Día 5', 'Día 4', 'Día 3', 'Día 2', 'Ayer', 'Hoy'],
+        datasets: [{
+            label: 'Hallazgos por Día',
+            data: [2, 4, 1, 8, 3, 6, 5, 7],
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+function runScanDomain() {
+    if (confirm('¿Ejecutar escaneo para {{ domain.domain }}?')) {
+        fetch('/api/v1/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': 'api-key-here'
+            },
+            body: JSON.stringify({
+                domain: '{{ domain.domain }}'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Escaneo iniciado exitosamente');
+            } else {
+                alert('Error iniciando escaneo: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        });
+    }
+}
+
+function filterFindings(type) {
+    const rows = document.querySelectorAll('#findingsTable tbody tr');
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    rows.forEach(row => {
+        let show = false;
+        
+        switch(type) {
+            case 'all':
+                show = true;
+                break;
+            case 'critical':
+                show = row.dataset.critical === 'true';
+                break;
+            case 'recent':
+                const discoveredDate = new Date(row.dataset.discovered);
+                show = discoveredDate > oneDayAgo;
+                break;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    // Actualizar botones activos
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+    event.target.classList.remove('btn-outline-primary');
+    event.target.classList.add('btn-primary');
+}
+
+function createAlert(url) {
+    if (confirm('¿Crear alerta para esta URL crítica?')) {
+        // Implementar creación de alerta
+        alert('Funcionalidad de alerta implementada via API');
+    }
+}
+
+function viewTrends() {
+    alert('Vista de tendencias - Por implementar');
+}
+
+function exportDomainData() {
+    window.location.href = `/export/findings?domain={{ domain.domain }}`;
+}
+</script>
+{% endblock %}

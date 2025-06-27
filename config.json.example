@@ -1,0 +1,265 @@
+# config.json.example
+{
+  "system": {
+    "name": "WebFuzzing Pro",
+    "version": "2.0.0",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "log_level": "INFO"
+  },
+  "fuzzing": {
+    "max_workers": 10,
+    "timeout": 5,
+    "user_agent": "Mozilla/5.0 (WebFuzzer Pro 2.0)",
+    "retry_count": 3,
+    "delay_between_requests": 0.1,
+    "status_codes_of_interest": [200, 201, 202, 301, 302, 403, 500],
+    "critical_paths": [".git", "admin", "config.php", "backup", "panel", "test", "dev"],
+    "max_path_length": 12,
+    "alphabet": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "numbers": "0123456789",
+    "special_chars": "_-"
+  },
+  "database": {
+    "type": "sqlite",
+    "name": "webfuzzing.db",
+    "backup_interval": 86400,
+    "cleanup_after_days": 30
+  },
+  "notifications": {
+    "telegram": {
+      "enabled": false,
+      "bot_token": "YOUR_BOT_TOKEN_HERE",
+      "chat_id": "YOUR_CHAT_ID_HERE",
+      "critical_only": true
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username": "your-email@gmail.com",
+      "password": "your-app-password",
+      "recipients": ["admin@yourcompany.com"]
+    }
+  },
+  "schedules": {
+    "general_scan": "0 8,13,18,23 * * *",
+    "deep_scan": "0 2 * * 0",
+    "report_times": ["09:00", "14:00"],
+    "working_hours": {
+      "start": "08:00",
+      "end": "16:00"
+    }
+  },
+  "tools": {
+    "ffuf": {
+      "enabled": true,
+      "path": "ffuf",
+      "default_options": ["-mc", "200,403", "-t", "50"]
+    },
+    "dirsearch": {
+      "enabled": true,
+      "path": "python3 -m dirsearch",
+      "default_options": ["-t", "10", "--plain-text-report"]
+    }
+  },
+  "files": {
+    "domains_file": "data/dominios.csv",
+    "dictionaries_dir": "data/diccionarios",
+    "results_dir": "data/resultados",
+    "discovered_paths": "data/descubiertos.txt",
+    "backup_dir": "backups"
+  },
+  "web": {
+    "host": "127.0.0.1",
+    "port": 5000,
+    "debug": false,
+    "secret_key": "change-this-secret-key-in-production",
+    "session_timeout": 3600
+  },
+  "api": {
+    "host": "127.0.0.1",
+    "port": 8000,
+    "api_key": "change-this-api-key-in-production",
+    "rate_limit": "100/hour"
+  }
+}
+
+# .gitignore
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# WebFuzzing Pro specific
+config.json
+*.db
+logs/
+backups/
+data/resultados/
+data/descubiertos.txt
+*.csv
+temp/
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# VS Code
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# data/dominios_ejemplo.csv
+# Archivo de ejemplo para configurar dominios
+# Formato: dominio[:puerto]
+# Líneas que empiecen con # son comentarios
+
+# Ejemplos de configuración:
+# miempresa.com
+# miempresa.com:443
+# miempresa.com:8080
+# app.miempresa.com
+# intranet.miempresa.com
+# https://api.miempresa.com
+# test.miempresa.com:80
+
+# Agregar tus dominios aquí:
+example.com
+test.example.com:8080

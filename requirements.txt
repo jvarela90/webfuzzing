@@ -1,161 +1,67 @@
-# ==========================================
-# URLControl Security System - Requirements
-# Versión Consolidada - Completa y Optimizada
-# ==========================================
+# requirements.txt
+# WebFuzzing Pro - Dependencias de Python
 
-# === CORE WEB FRAMEWORK ===
-flask>=2.3.0,<3.0.0
-flask-cors>=4.0.0,<5.0.0
-flask-restful>=0.3.10,<1.0.0
-flask-jwt-extended>=4.5.0,<5.0.0
-flask-limiter>=3.0.0,<4.0.0
-flask-sqlalchemy>=3.0.5,<4.0.0
-flask-socketio>=5.3.0,<6.0.0
-werkzeug>=2.3.0,<3.0.0
-jinja2>=3.1.0,<4.0.0
+# Framework web y API
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SocketIO==5.3.6
 
-# === HTTP & ASYNC ===
-requests>=2.31.0,<3.0.0
-aiohttp>=3.8.5,<4.0.0
-httpx>=0.24.1,<1.0.0
+# Base de datos y ORM
+sqlite3
 
-# === DATABASE & MIGRATIONS ===
-sqlalchemy>=2.0.20,<3.0.0
-alembic>=1.11.3,<2.0.0
+# Requests HTTP
+requests==2.31.0
+urllib3==2.0.7
 
-# === FUZZING & SECURITY ===
-beautifulsoup4>=4.12.2,<5.0.0
-selenium>=4.11.2,<5.0.0
-python-nmap>=0.7.1,<1.0.0
-cryptography>=41.0.0,<42.0.0
-bcrypt>=4.0.0,<5.0.0
+# Concurrencia y threading
+concurrent-futures
 
-# === DATA PROCESSING & ANALYSIS ===
-pandas>=2.0.0,<3.0.0
-numpy>=1.24.0,<2.0.0
-scikit-learn>=1.3.0,<2.0.0
-joblib>=1.3.0,<2.0.0
+# Programación de tareas
+schedule==1.2.0
 
-# === VISUALIZATION ===
-plotly>=5.15.0,<6.0.0
+# Manejo de archivos y rutas
+pathlib2==2.3.7
 
-# === UTILITIES ===
-pyyaml>=6.0.1,<7.0.0
-python-dotenv>=1.0.0,<2.0.0
-click>=8.0.0,<9.0.0
-colorama>=0.4.6,<1.0.0
-tqdm>=4.65.0,<5.0.0
-schedule>=1.2.0,<2.0.0
-marshmallow>=3.19.0,<4.0.0
+# Logging y utilidades
+colorlog==6.7.0
 
-# === LOGGING & MONITORING ===
-loguru>=0.7.0,<1.0.0
+# Notificaciones
+python-telegram-bot==20.7
 
-# === NOTIFICATIONS ===
-python-telegram-bot>=20.0.0,<21.0.0
+# Análisis de datos y exportación
+pandas==2.1.4
+openpyxl==3.1.2
 
-# === NLP (OPTIONAL) ===
-nltk>=3.8.0,<4.0.0
+# Validación y parsing
+validators==0.22.0
+python-dateutil==2.8.2
 
-# === PERFORMANCE ===
-orjson>=3.9.4,<4.0.0
-
-# === DEVELOPMENT & TESTING ===
-pytest>=7.4.0,<8.0.0
-pytest-cov>=4.1.0,<5.0.0
-pytest-asyncio>=0.21.1,<1.0.0
-black>=23.7.0,<24.0.0
-flake8>=6.0.0,<7.0.0
-
-# Web Framework
-flask>=2.3.0
-flask-cors>=4.0.0
-flask-socketio>=5.3.0
-
-# HTTP y Async
-requests>=2.31.0
-aiohttp>=3.8.5
-httpx>=0.24.1
-
-# Fuzzing y Seguridad
-beautifulsoup4>=4.12.2
-selenium>=4.11.2
-python-nmap>=0.7.1
-
-# Base de datos (sqlite3 viene incluido en Python)
-sqlalchemy>=2.0.20
-alembic>=1.11.3
-
-# Utilidades
-pyyaml>=6.0.1
-python-dotenv>=1.0.0
-colorama>=0.4.6
-tqdm>=4.65.0
-
-# Logging y monitoreo
-loguru>=0.7.0
+# Seguridad
+cryptography==41.0.8
+bcrypt==4.1.2
 
 # Desarrollo y testing
-pytest>=7.4.0
-black>=23.7.0
-flake8>=6.0.0
+pytest==7.4.3
+pytest-cov==4.1.0
 
-# Procesamiento de datos
-pandas>=2.0.3
-plotly>=5.15.0
-jinja2>=3.1.2
+# Sistema y OS
+psutil==5.9.6
+python-dotenv==1.0.0
 
-# Criptografía y seguridad
-cryptography>=41.0.3
+# Web scraping adicional
+beautifulsoup4==4.12.2
+lxml==4.9.3
 
-# === ADDITIONAL SECURITY TOOLS (OPTIONAL) ===
-# Descomenta las que necesites según tus requerimientos específicos:
-# wfuzz>=3.1.0,<4.0.0              # Advanced web fuzzing
-# dnspython>=2.4.0,<3.0.0          # DNS resolution and manipulation
-# pyopenssl>=23.2.0,<24.0.0        # SSL/TLS certificate handling
-# paramiko>=3.3.0,<4.0.0           # SSH connections and SFTP
-# scapy>=2.5.0,<3.0.0              # Network packet manipulation
-# censys>=2.2.0,<3.0.0             # Censys API integration
-# shodan>=1.29.0,<2.0.0            # Shodan API integration
+# Para integración con herramientas externas
+subprocess32==3.5.4; python_version < '3.8'
 
-# === WEB DRIVERS (SELENIUM) ===
-# webdriver-manager>=4.0.0,<5.0.0  # Automatic webdriver management
+# Utilidades adicionales
+tqdm==4.66.1
+click==8.1.7
+rich==13.7.0
 
-# === DATABASE DRIVERS (OPTIONAL) ===
-# Descomenta según tu base de datos:
-# psycopg2-binary>=2.9.0,<3.0.0    # PostgreSQL
-# pymysql>=1.1.0,<2.0.0            # MySQL/MariaDB
-# redis>=4.6.0,<5.0.0              # Redis cache
-
-# === API INTEGRATIONS (OPTIONAL) ===
-# virustotal-api>=1.1.11,<2.0.0    # VirusTotal API
-# python-whois>=0.8.0,<1.0.0       # WHOIS lookups
-
-# === ADDITIONAL MONITORING (OPTIONAL) ===
-# prometheus-client>=0.17.0,<1.0.0 # Prometheus metrics
-# grafana-api>=1.0.0,<2.0.0        # Grafana integration
-
-# === MACHINE LEARNING (OPTIONAL) ===
-# tensorflow>=2.13.0,<3.0.0        # Deep learning for pattern recognition
-# torch>=2.0.0,<3.0.0              # PyTorch for ML models
-
-# ==========================================
-# INSTALLATION NOTES:
-# ==========================================
-# 1. Create virtual environment:
-#    python -m venv venv
-#    source venv/bin/activate  # Linux/Mac
-#    venv\Scripts\activate     # Windows
-#
-# 2. Install requirements:
-#    pip install -r requirements.txt
-#
-# 3. For Selenium support, you may need:
-#    - Chrome/Chromium browser
-#    - ChromeDriver (can be auto-managed with webdriver-manager)
-#
-# 4. For advanced features, uncomment optional dependencies as needed
-#
-# 5. For production deployment, consider pinning exact versions:
-#    pip freeze > requirements-prod.txt
-# ==========================================
+# requirements-dev.txt (opcional para desarrollo)
+# black==23.11.0
+# flake8==6.1.0
+# mypy==1.7.1
+# pre-commit==3.6.0

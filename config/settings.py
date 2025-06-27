@@ -1,215 +1,187 @@
-"""
-Configuración del Security Fuzzing System
-"""
+# config/settings.py
 import os
-import yaml
+import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List, Any
 
 class Config:
     """Configuración centralizada del sistema"""
     
-    def __init__(self, config_file: str = "config.yaml"):
-        self.base_dir = Path(__file__).parent.parent.absolute()
-        self.config_file = self.base_dir / config_file
-        self._config = self._load_config()
+    def __init__(self, config_file: str = None):
+        self.base_dir = Path(__file__).parent.parent
+        self.config_file = config_file or str(self.base_dir / "config.json")
+        self._load_config()
         
-    def _load_config(self) -> Dict[str, Any]:
-        """Cargar configuración desde archivo YAML"""
-        try:
-            if self.config_file.exists():
-                with open(self.config_file, 'r', encoding='utf-8') as f:
-                    return yaml.safe_load(f) or {}
-            else:
-                # Configuración por defecto si no existe el archivo
-                return self._default_config()
-        except Exception as e:
-            print(f"⚠️ Error cargando config.yaml: {e}")
-            return self._default_config()
-    
-    def _default_config(self) -> Dict[str, Any]:
-        """Configuración por defecto"""
-        return {
-            'system': {
-                'name': 'Security Fuzzing System',
-                'version': '2.0.0',
-                'environment': 'development',
-                'debug': True,
-                'log_level': 'INFO'
+    def _load_config(self):
+        """Cargar configuración desde archivo JSON"""
+        default_config = {
+            # Configuración general
+            "system": {
+                "name": "WebFuzzing Pro",
+                "version": "2.0.0",
+                "timezone": "America/Argentina/Buenos_Aires",
+                "log_level": "INFO"
             },
-            'database': {
-                'type': 'sqlite',
-                'path': 'data/databases/fuzzing.db',
-                'backup_enabled': True,
-                'backup_interval_hours': 24
+            
+            # Configuración de fuzzing
+            "fuzzing": {
+                "max_workers": 10,
+                "timeout": 5,
+                "user_agent": "Mozilla/5.0 (WebFuzzer Pro 2.0)",
+                "retry_count": 3,
+                "delay_between_requests": 0.1,
+                "status_codes_of_interest": [200, 201, 202, 301, 302, 403, 500],
+                "critical_paths": [".git", "admin", "config.php", "backup", "panel", "test", "dev"],
+                "max_path_length": 12,
+                "alphabet": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                "numbers": "0123456789",
+                "special_chars": "_-"
             },
-            'web': {
-                'host': '0.0.0.0',
-                'port': 5000,
-                'secret_key': 'dev-secret-key-change-in-production'
+            
+            # Configuración de base de datos
+            "database": {
+                "type": "sqlite",
+                "name": "webfuzzing.db",
+                "backup_interval": 86400,  # 24 horas
+                "cleanup_after_days": 30
             },
-            'api': {
-                'host': '0.0.0.0',
-                'port': 8000,
-                'enable_cors': True
-            },
-            'network': {
-                'max_workers': 6,
-                'timeout': 15,
-                'verify_ssl': False
-            },
-            'tools': {
-                'ffuf': {
-                    'enabled': True,
-                    'path': 'tools/ffuf/ffuf.exe'
+            
+            # Configuración de notificaciones
+            "notifications": {
+                "telegram": {
+                    "enabled": False,
+                    "bot_token": "",
+                    "chat_id": "",
+                    "critical_only": True
                 },
-                'dirsearch': {
-                    'enabled': True,
-                    'path': 'tools/dirsearch/dirsearch.py'
+                "email": {
+                    "enabled": False,
+                    "smtp_server": "",
+                    "smtp_port": 587,
+                    "username": "",
+                    "password": "",
+                    "recipients": []
                 }
+            },
+            
+            # Configuración de horarios
+            "schedules": {
+                "general_scan": "0 8,13,18,23 * * *",  # 08:00, 13:00, 18:00, 23:00
+                "deep_scan": "0 2 * * 0",              # Domingos a las 2:00
+                "report_times": ["09:00", "14:00"],
+                "working_hours": {
+                    "start": "08:00",
+                    "end": "16:00"
+                }
+            },
+            
+            # Configuración de integración con herramientas
+            "tools": {
+                "ffuf": {
+                    "enabled": True,
+                    "path": "ffuf",
+                    "default_options": ["-mc", "200,403", "-t", "50"]
+                },
+                "dirsearch": {
+                    "enabled": True,
+                    "path": "python3 -m dirsearch",
+                    "default_options": ["-t", "10", "--plain-text-report"]
+                }
+            },
+            
+            # Configuración de archivos
+            "files": {
+                "domains_file": "data/dominios.csv",
+                "dictionaries_dir": "data/diccionarios",
+                "results_dir": "data/resultados",
+                "discovered_paths": "data/descubiertos.txt",
+                "backup_dir": "backups"
+            },
+            
+            # Configuración web
+            "web": {
+                "host": "127.0.0.1",
+                "port": 5000,
+                "debug": True,
+                "secret_key": "your-secret-key-change-this",
+                "session_timeout": 3600
+            },
+            
+            # Configuración API
+            "api": {
+                "host": "127.0.0.1",
+                "port": 8000,
+                "api_key": "your-api-key-change-this",
+                "rate_limit": "100/hour"
             }
         }
+        
+        if os.path.exists(self.config_file):
+            with open(self.config_file, 'r', encoding='utf-8') as f:
+                loaded_config = json.load(f)
+                default_config.update(loaded_config)
+        else:
+            # Crear archivo de configuración por defecto
+            self.save_config(default_config)
+            
+        self.config = default_config
+        
+        # Crear directorios necesarios
+        self._create_directories()
+        
+    def _create_directories(self):
+        """Crear directorios necesarios"""
+        dirs_to_create = [
+            self.get('files.results_dir'),
+            self.get('files.dictionaries_dir'),
+            self.get('files.backup_dir'),
+            'logs',
+            'data'
+        ]
+        
+        for dir_path in dirs_to_create:
+            Path(self.base_dir / dir_path).mkdir(parents=True, exist_ok=True)
     
     def get(self, key: str, default=None):
-        """Obtener valor de configuración usando notación punto"""
+        """Obtener valor de configuración usando notación de punto"""
         keys = key.split('.')
-        value = self._config
+        value = self.config
         
-        try:
-            for k in keys:
+        for k in keys:
+            if isinstance(value, dict) and k in value:
                 value = value[k]
-            return value
-        except (KeyError, TypeError):
-            return default
+            else:
+                return default
+                
+        return value
     
-    def set(self, key: str, value):
-        """Establecer valor de configuración"""
+    def set(self, key: str, value: Any):
+        """Establecer valor de configuración usando notación de punto"""
         keys = key.split('.')
-        config = self._config
+        config_ref = self.config
         
         for k in keys[:-1]:
-            if k not in config:
-                config[k] = {}
-            config = config[k]
-        
-        config[keys[-1]] = value
-    
-    def save(self):
-        """Guardar configuración actual al archivo"""
-        try:
-            # Crear directorio si no existe
-            self.config_file.parent.mkdir(parents=True, exist_ok=True)
+            if k not in config_ref:
+                config_ref[k] = {}
+            config_ref = config_ref[k]
             
-            with open(self.config_file, 'w', encoding='utf-8') as f:
-                yaml.dump(self._config, f, default_flow_style=False, indent=2)
-            return True
-        except Exception as e:
-            print(f"❌ Error guardando configuración: {e}")
-            return False
+        config_ref[keys[-1]] = value
     
-    # Propiedades para acceso fácil a configuraciones comunes
-    @property
-    def DEBUG(self) -> bool:
-        return self.get('system.debug', False)
+    def save_config(self, config_dict: Dict = None):
+        """Guardar configuración en archivo"""
+        config_to_save = config_dict or self.config
+        
+        with open(self.config_file, 'w', encoding='utf-8') as f:
+            json.dump(config_to_save, f, indent=2, ensure_ascii=False)
     
-    @property
-    def LOG_LEVEL(self) -> str:
-        return self.get('system.log_level', 'INFO')
+    def get_domains_file(self) -> Path:
+        """Obtener ruta del archivo de dominios"""
+        return self.base_dir / self.get('files.domains_file')
     
-    @property
-    def DATABASE_PATH(self) -> str:
-        db_path = self.get('database.path', 'data/databases/fuzzing.db')
-        if not os.path.isabs(db_path):
-            return str(self.base_dir / db_path)
-        return db_path
+    def get_results_dir(self) -> Path:
+        """Obtener directorio de resultados"""
+        return self.base_dir / self.get('files.results_dir')
     
-    @property
-    def WEB_HOST(self) -> str:
-        return self.get('web.host', '0.0.0.0')
-    
-    @property
-    def WEB_PORT(self) -> int:
-        return self.get('web.port', 5000)
-    
-    @property
-    def API_HOST(self) -> str:
-        return self.get('api.host', '0.0.0.0')
-    
-    @property
-    def API_PORT(self) -> int:
-        return self.get('api.port', 8000)
-    
-    @property
-    def SECRET_KEY(self) -> str:
-        return self.get('web.secret_key', 'change-this-secret-key')
-    
-    @property
-    def MAX_WORKERS(self) -> int:
-        return self.get('network.max_workers', 6)
-    
-    @property
-    def TIMEOUT(self) -> int:
-        return self.get('network.timeout', 15)
-    
-    @property
-    def VERIFY_SSL(self) -> bool:
-        return self.get('network.verify_ssl', False)
-    
-    @property
-    def FFUF_PATH(self) -> str:
-        path = self.get('tools.ffuf.path', 'tools/ffuf/ffuf.exe')
-        if not os.path.isabs(path):
-            return str(self.base_dir / path)
-        return path
-    
-    @property
-    def DIRSEARCH_PATH(self) -> str:
-        path = self.get('tools.dirsearch.path', 'tools/dirsearch/dirsearch.py')
-        if not os.path.isabs(path):
-            return str(self.base_dir / path)
-        return path
-    
-    def is_tool_enabled(self, tool_name: str) -> bool:
-        """Verificar si una herramienta está habilitada"""
-        return self.get(f'tools.{tool_name}.enabled', False)
-    
-    def get_wordlists(self) -> Dict[str, str]:
-        """Obtener rutas de wordlists"""
-        return self.get('wordlists', {})
-    
-    def get_notifications_config(self) -> Dict[str, Any]:
-        """Obtener configuración de notificaciones"""
-        return self.get('notifications', {})
-    
-    def __str__(self):
-        return f"Config(file={self.config_file}, loaded={len(self._config)} keys)"
-    
-    def __repr__(self):
-        return self.__str__()
-
-# Instancia global de configuración
-config = Config()
-
-# Funciones de conveniencia
-def get_config(key: str, default=None):
-    """Función helper para obtener configuración"""
-    return config.get(key, default)
-
-def set_config(key: str, value):
-    """Función helper para establecer configuración"""
-    return config.set(key, value)
-
-def save_config():
-    """Función helper para guardar configuración"""
-    return config.save()
-
-if __name__ == "__main__":
-    # Test de la configuración
-    print("🧪 Testing Config Module...")
-    print(f"Config file: {config.config_file}")
-    print(f"Database path: {config.DATABASE_PATH}")
-    print(f"Web server: {config.WEB_HOST}:{config.WEB_PORT}")
-    print(f"API server: {config.API_HOST}:{config.API_PORT}")
-    print(f"Debug mode: {config.DEBUG}")
-    print(f"Max workers: {config.MAX_WORKERS}")
-    print("✅ Config module working correctly!")
+    def get_dictionaries_dir(self) -> Path:
+        """Obtener directorio de diccionarios"""
+        return self.base_dir / self.get('files.dictionaries_dir')

@@ -1,0 +1,159 @@
+<!-- web/templates/alerts.html CORREGIDO -->
+{% extends "base.html" %}
+
+{% block title %}Alertas - WebFuzzing Pro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-exclamation-triangle"></i> Sistema de Alertas</h1>
+        <p class="text-muted">Gestión y seguimiento de alertas de seguridad</p>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('alerts') }}" 
+                       class="btn {{ 'btn-primary' if status_filter == 'all' else 'btn-outline-primary' }}">
+                        Todas
+                    </a>
+                    <a href="{{ url_for('alerts', status='new') }}" 
+                       class="btn {{ 'btn-primary' if status_filter == 'new' else 'btn-outline-primary' }}">
+                        Nuevas
+                    </a>
+                    <a href="{{ url_for('alerts', status='investigating') }}" 
+                       class="btn {{ 'btn-primary' if status_filter == 'investigating' else 'btn-outline-primary' }}">
+                        En Investigación
+                    </a>
+                    <a href="{{ url_for('alerts', status='resolved') }}" 
+                       class="btn {{ 'btn-primary' if status_filter == 'resolved' else 'btn-outline-primary' }}">
+                        Resueltas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de alertas -->
+<div class="row">
+    {% if alerts %}
+        {% for alert in alerts %}
+        <div class="col-md-6 mb-3">
+            <div class="card border-{{ 'danger' if alert.severity == 'high' else 'warning' if alert.severity == 'medium' else 'info' }}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-{{ 'danger' if alert.severity == 'high' else 'warning' if alert.severity == 'medium' else 'info' }}">
+                            {{ alert.severity.upper() }}
+                        </span>
+                        <span class="ms-2 status-{{ alert.status }}">
+                            <i class="fas fa-{{ 'circle' if alert.status == 'new' else 'clock' if alert.status == 'investigating' else 'check-circle' }}"></i>
+                            {{ alert.status.title() }}
+                        </span>
+                    </div>
+                    <small class="text-muted">{{ alert.created_at }}</small>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ alert.title }}</h6>
+                    <p class="card-text">{{ alert.message }}</p>
+                    
+                    {% if alert.url %}
+                    <p class="card-text">
+                        <strong>URL:</strong> 
+                        <a href="{{ alert.url }}" target="_blank" class="text-decoration-none">
+                            {{ alert.url }}
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </p>
+                    {% endif %}
+                    
+                    {% if alert.analyst_notes %}
+                    <div class="alert alert-info alert-sm">
+                        <strong>Notas del Analista:</strong><br>
+                        {{ alert.analyst_notes }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if alert.status != 'resolved' %}
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-warning alert-action-btn" 
+                                        data-alert-id="{{ alert.id }}" 
+                                        data-action="investigating">
+                                    Investigar
+                                </button>
+                                <button class="btn btn-success alert-action-btn" 
+                                        data-alert-id="{{ alert.id }}" 
+                                        data-action="resolved">
+                                    Resolver
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('alert_detail', alert_id=alert.id) }}" class="btn btn-outline-primary btn-sm">
+                            Ver Detalle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h5 class="text-muted">No hay alertas {{ status_filter if status_filter != 'all' else '' }}</h5>
+            <p class="text-muted">Todo parece estar en orden</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar botones de acción de alertas
+    document.querySelectorAll('.alert-action-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const alertId = this.getAttribute('data-alert-id');
+            const action = this.getAttribute('data-action');
+            updateAlertStatus(alertId, action);
+        });
+    });
+});
+
+function updateAlertStatus(alertId, status) {
+    const notes = prompt('Agregar notas (opcional):');
+    
+    fetch('/update_alert/' + alertId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: status,
+            notes: notes || ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error actualizando alerta: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al actualizar alerta');
+    });
+}
+</script>
+{% endblock %}
