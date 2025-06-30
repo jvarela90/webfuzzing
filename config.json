@@ -1,0 +1,115 @@
+{
+  "system": {
+    "name": "WebFuzzing Pro",
+    "version": "2.0.0",
+    "timezone": "America/Argentina/Buenos_Aires",
+    "log_level": "INFO"
+  },
+  "fuzzing": {
+    "max_workers": 10,
+    "timeout": 5,
+    "user_agent": "Mozilla/5.0 (WebFuzzer Pro 2.0)",
+    "retry_count": 3,
+    "delay_between_requests": 0.1,
+    "status_codes_of_interest": [
+      200,
+      201,
+      202,
+      301,
+      302,
+      403,
+      500
+    ],
+    "critical_paths": [
+      ".git",
+      "admin",
+      "config.php",
+      "backup",
+      "panel",
+      "test",
+      "dev"
+    ],
+    "max_path_length": 12,
+    "alphabet": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "numbers": "0123456789",
+    "special_chars": "_-"
+  },
+  "database": {
+    "type": "sqlite",
+    "name": "webfuzzing.db",
+    "backup_interval": 86400,
+    "cleanup_after_days": 30
+  },
+  "notifications": {
+    "telegram": {
+      "enabled": false,
+      "bot_token": "YOUR_BOT_TOKEN_HERE",
+      "chat_id": "YOUR_CHAT_ID_HERE",
+      "critical_only": true
+    },
+    "email": {
+      "enabled": true,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username": "julian.varela90@gmail.com",
+      "password": "13456",
+      "recipients": [
+        "julian.varela90@gmail.com",
+        "otsoaeusk@gmail.com"
+      ]
+    }
+  },
+  "schedules": {
+    "general_scan": "0 8,13,18,23 * * *",
+    "deep_scan": "0 2 * * 0",
+    "report_times": [
+      "09:00",
+      "14:00"
+    ],
+    "working_hours": {
+      "start": "08:00",
+      "end": "16:00"
+    }
+  },
+  "tools": {
+    "ffuf": {
+      "enabled": true,
+      "path": "ffuf",
+      "default_options": [
+        "-mc",
+        "200,403",
+        "-t",
+        "50"
+      ]
+    },
+    "dirsearch": {
+      "enabled": true,
+      "path": "python3 -m dirsearch",
+      "default_options": [
+        "-t",
+        "10",
+        "--plain-text-report"
+      ]
+    }
+  },
+  "files": {
+    "domains_file": "data/dominios.csv",
+    "dictionaries_dir": "data/diccionarios",
+    "results_dir": "data/resultados",
+    "discovered_paths": "data/descubiertos.txt",
+    "backup_dir": "backups"
+  },
+  "web": {
+    "host": "127.0.0.1",
+    "port": 5000,
+    "debug": false,
+    "secret_key": "69F4I2JQgt5_uZhTJU_Xqz1b_msFr1BwReBS55ebIgs",
+    "session_timeout": 3600
+  },
+  "api": {
+    "host": "127.0.0.1",
+    "port": 8000,
+    "api_key": "Tf0Vdn5VX8CPiBZU9SQx4-a9RZmDufzH9eCPLFFbHPg",
+    "rate_limit": "100/hour"
+  }
+}

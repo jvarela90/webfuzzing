@@ -52,7 +52,7 @@ WebFuzzing Pro es una plataforma avanzada de descubrimiento y análisis de rutas
 
 ```cmd
 # 1. Clonar repositorio
-git clone https://github.com/jvarela90/urlcontrol.git
+git clone https://github.com/jvarela90/webfuzzing.git
 cd urlcontrol
 
 # 2. Crear entorno virtual
