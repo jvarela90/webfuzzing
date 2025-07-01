@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # .gitignore
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -9,6 +10,21 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+=======
+############################################################
+# Python
+############################################################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.installed.cfg
+
+# Python packaging
+>>>>>>> 6b2d6359dc86598b88eafd0924998ea3371001b6
 build/
 develop-eggs/
 dist/
@@ -22,6 +38,7 @@ sdist/
 var/
 wheels/
 pip-wheel-metadata/
+<<<<<<< HEAD
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -148,10 +165,38 @@ ehthumbs.db
 Icon?
 
 # Windows
+=======
+__pypackages__/
+
+############################################################
+# Virtual environments
+############################################################
+venv/
+env/
+ENV/
+.venv/
+
+############################################################
+# Editor & IDE files
+############################################################
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.bak
+
+############################################################
+# System & OS files
+############################################################
+.DS_Store
+>>>>>>> 6b2d6359dc86598b88eafd0924998ea3371001b6
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+<<<<<<< HEAD
 *.lnk
 
 # VS Code
@@ -177,3 +222,49 @@ $RECYCLE.BIN/
 # Agregar tus dominios aquí:
 example.com
 test.example.com:8080
+=======
+
+############################################################
+# Logs, caches, and reports
+############################################################
+logs/
+*.log
+data/cache/
+reports/
+*.tmp
+*.temp
+temp/
+
+############################################################
+# Databases (project specific)
+############################################################
+data/databases/*.db
+
+############################################################
+# Tools (ignore contents, keep folder)
+############################################################
+tools/*/
+!tools/.gitkeep
+
+############################################################
+# Secrets & sensitive configuration
+############################################################
+config.yaml
+data/config/secrets.yaml
+*.pem
+*.key
+*.crt
+*.p12
+*.env
+.env.*
+
+############################################################
+# Backup & temporary files
+############################################################
+*.bak
+*.orig
+*.old
+*.swp
+*.tmp
+*.temp
+>>>>>>> 6b2d6359dc86598b88eafd0924998ea3371001b6
