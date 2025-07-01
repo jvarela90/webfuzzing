@@ -68,7 +68,7 @@ def create_api(config):
             return jsonify({'error': str(e)}), 500
     
     @app.route('/api/v1/domains', methods=['GET'])
-    @require_api_key
+    #@require_api_key
     def get_domains():
         """Obtener lista de dominios"""
         try:
@@ -80,7 +80,7 @@ def create_api(config):
             return jsonify({'error': str(e)}), 500
     
     @app.route('/api/v1/domains', methods=['POST'])
-    @require_api_key
+    #@require_api_key
     def add_domain():
         """Agregar nuevo dominio"""
         try:
@@ -321,5 +321,74 @@ def create_api(config):
     @app.errorhandler(500)
     def internal_error(error):
         return jsonify({'error': 'Internal server error'}), 500
+    
+    @app.route('/', methods=['GET'])
+    def api_root():
+        """Ruta raíz de la API"""
+        return jsonify({
+            'status': 'WebFuzzing API v1.0',
+            'endpoints': {
+                'health': '/api/v1/health',
+                'stats': '/api/stats',  # Ruta pública para dashboard
+                'docs': '/api/v1/docs'
+            }
+        })
+
+    @app.route('/api/stats', methods=['GET'])
+    def get_stats_public():
+        """Estadísticas públicas para el dashboard"""
+        try:
+            stats = {
+                'total_domains': len(db.get_active_domains()),
+                'recent_findings': len(db.get_recent_findings(24)),
+                'critical_findings': len(db.get_critical_findings()),
+                'new_alerts': db.execute_query(
+                    'SELECT COUNT(*) as count FROM alerts WHERE status = "new"',
+                    fetch=True
+                )[0]['count'],
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            return jsonify(stats)
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas públicas: {e}")
+            return jsonify({'error': str(e)}), 500
+
+    @app.route('/api/recent_findings', methods=['GET'])
+    def get_recent_findings_public():
+        """Hallazgos recientes públicos para el dashboard"""
+        try:
+            hours = int(request.args.get('hours', 24))
+            findings = db.get_recent_findings(hours)
+            return jsonify([dict(f) for f in findings])
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo hallazgos recientes: {e}")
+            return jsonify({'error': str(e)}), 500
+
+#    @app.route('/api/domains', methods=['POST'])
+#    def add_domain_public():
+#        """Agregar dominio público para el dashboard"""
+#        try:
+#            data = request.get_json()
+#            
+#            if not data or 'domain' not in data:
+#                return jsonify({'error': 'Domain is required'}), 400
+#            
+#            domain_id = db.add_domain(
+#                data['domain'],
+#               data.get('port', 443),
+#               data.get('protocol', 'https')
+#           )
+#            
+#           return jsonify({
+#                'message': 'Domain added successfully',
+#                'domain_id': domain_id
+#            }), 201
+#            
+#        except Exception as e:
+#            logger.error(f"Error agregando dominio público: {e}")
+#            return jsonify({'error': str(e)}), 500
     
     return app

@@ -176,18 +176,56 @@ class WebFuzzingApp {
     }
 
     updateDashboardStats() {
-        fetch('/api/stats')
-            .then(response => response.json())
-            .then(data => {
-                this.updateStatElement('totalDomains', data.total_domains);
-                this.updateStatElement('recentFindings', data.recent_findings);
-                this.updateStatElement('criticalFindings', data.critical_findings);
-                this.updateStatElement('newAlerts', data.new_alerts);
-                
-                this.updateAlertCounter(data.new_alerts);
-            })
-            .catch(error => console.error('Error actualizando estadísticas:', error));
+        // Obtener API key del config o usar una por defecto
+        const apiKey = window.API_KEY || document.querySelector('meta[name="api-key"]')?.content;
+        
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        // Agregar API key si está disponible
+        if (apiKey) {
+            headers['X-API-Key'] = apiKey;
+        }
+
+        fetch('/api/stats', {
+            method: 'GET',
+            headers: headers
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            this.updateStatElement('totalDomains', data.total_domains);
+            this.updateStatElement('recentFindings', data.recent_findings);
+            this.updateStatElement('criticalFindings', data.critical_findings);
+            this.updateStatElement('newAlerts', data.new_alerts);
+            
+            this.updateAlertCounter(data.new_alerts);
+        })
+        .catch(error => {
+            console.error('Error actualizando estadísticas:', error);
+            // Mostrar mensaje de error en la UI
+            this.showNotification('Error conectando con la API', 'critical');
+        });
     }
+    
+    //updateDashboardStats() {
+    //    fetch('/api/stats')
+    //        .then(response => response.json())
+    //        .then(data => {
+    //            this.updateStatElement('totalDomains', data.total_domains);
+    //            this.updateStatElement('recentFindings', data.recent_findings);
+    //           this.updateStatElement('criticalFindings', data.critical_findings);
+    //            this.updateStatElement('newAlerts', data.new_alerts);
+    //            
+    //            this.updateAlertCounter(data.new_alerts);
+    //        })
+    //        .catch(error => console.error('Error actualizando estadísticas:', error));
+    //}
 
     updateStatElement(id, value) {
         const element = document.getElementById(id);
