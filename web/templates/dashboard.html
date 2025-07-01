@@ -182,7 +182,7 @@
 {% block scripts %}
 <script>
 // Gráfico de actividad
-const activityData = {{ activity_data | tojsonfilter | safe }};
+const activityData = {{ activity_data | tojson | safe }};
 const ctx = document.getElementById('activityChart').getContext('2d');
 
 const hours = Array.from({length: 24}, (_, i) => i.toString().padStart(2, '0'));

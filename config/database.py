@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 import json
 from datetime import datetime
 import threading
+from config.settings import Config 
 
 class DatabaseManager:
     """Gestor de base de datos SQLite"""

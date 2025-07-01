@@ -7,14 +7,14 @@ Flask-CORS==4.0.0
 Flask-SocketIO==5.3.6
 
 # Base de datos y ORM
-sqlite3
+#sqlite3
 
 # Requests HTTP
 requests==2.31.0
 urllib3==2.0.7
 
 # Concurrencia y threading
-concurrent-futures
+#concurrent-futures
 
 # Programación de tareas
 schedule==1.2.0
@@ -37,7 +37,7 @@ validators==0.22.0
 python-dateutil==2.8.2
 
 # Seguridad
-cryptography==41.0.8
+cryptography==41.0.0
 bcrypt==4.1.2
 
 # Desarrollo y testing
@@ -65,3 +65,58 @@ rich==13.7.0
 # flake8==6.1.0
 # mypy==1.7.1
 # pre-commit==3.6.0
+
+# WebFuzzing Pro - Dependencias de Python (Windows 11 Compatible)
+
+# Framework web principal
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SocketIO==5.3.6
+
+# HTTP requests y networking
+requests==2.31.0
+urllib3==2.0.7
+
+# Programación de tareas
+schedule==1.2.0
+
+# DNS resolution para subdomain scanner
+dnspython==2.4.2
+
+# Configuración y variables de entorno
+python-dotenv==1.0.0
+
+# Notificaciones Telegram
+python-telegram-bot==20.7
+
+# Validación de datos
+validators==0.22.0
+
+# Manejo de fechas
+python-dateutil==2.8.2
+
+# Información del sistema
+psutil==5.9.6
+
+# Web scraping
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Utilidades de línea de comandos
+click==8.1.7
+tqdm==4.66.1
+
+# Logging con colores
+colorlog==6.7.0
+
+# Criptografía y seguridad
+#cryptography==41.0.8
+
+# Exportación de datos (opcional)
+openpyxl==3.1.2
+
+# Testing (desarrollo)
+pytest==7.4.3
+
+# Formateo de código (desarrollo)
+black==23.11.0
